@@ -1,15 +1,14 @@
 package edu.berea.walkerje.mswp.edit;
 
 public enum EToolType {
-	//In retrospect, image paths are invalid.
-	//As of now, they are of no significance.
-	PENCIL			("Pencil", "pencil.png"),
-	ERASER			("Eraser", "eraser.png"),
-	FILL			("Fill", "paintbucket.png"),
-	RECT_SELECT		("Select", "rectselect.png"),
-	STAMP			("Stamp", "stamp.png"),
-	EYEDROP			("Eyedropper", "dropper.png"),
-	PUT_SPRITE		("Put Sprite", "putsprite.png");
+	// Tool names and images are directly pulled from this enum
+	PENCIL			("Pencil", "/edu/berea/walkerje/mswp/asset/pencil.png"),
+	ERASER			("Eraser", "/edu/berea/walkerje/mswp/asset/eraser.png"),
+	FILL			("Fill", "/edu/berea/walkerje/mswp/asset/paintbucket.png"),
+	RECT_SELECT		("Select", "/edu/berea/walkerje/mswp/asset/rectselect.png"),
+	STAMP			("Stamp", "/edu/berea/walkerje/mswp/asset/stamp.png"),
+	EYEDROP			("Eyedropper", "/edu/berea/walkerje/mswp/asset/dropper.png"),
+	PUT_SPRITE		("Put Sprite", "/edu/berea/walkerje/mswp/asset/sprite.png");
 	
 	/*Display Name String*/
 	public final String displayName;

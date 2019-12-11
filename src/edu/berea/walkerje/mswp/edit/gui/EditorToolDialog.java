@@ -52,11 +52,6 @@ public class EditorToolDialog extends JDialog {
 	
 	private JPanel contentPanel = new JPanel();
 	private JPanel toolButtonPanel;
-	private JToggleButton tglbtnPencil;
-	private JToggleButton tglbtnPaintBucket;
-	private JToggleButton tglbtnSelRectangle;
-	private JToggleButton tglbtnEraser;
-	private JToggleButton tglbtnStamp;
 	
 	private JToggleButton[] toolButtons;
 	
@@ -75,10 +70,8 @@ public class EditorToolDialog extends JDialog {
 	private SpriteView tileSelectionView = new SpriteView(null);
 
 	private ToolState toolState = new ToolState(EToolType.PENCIL);
-	private JToggleButton tglbtnEyeDropper;
 	private JLabel lblTilesheetNameVal;
 	private JLabel lblTileInfoVal;
-	private JToggleButton tglbtnSprite;
 	private JRadioButton rdbtnSnapToTile;
 	private JRadioButton rdbtnSelectEntities;
 	private JLabel lblSelectionSize;
@@ -177,41 +170,20 @@ public class EditorToolDialog extends JDialog {
 		toolButtonPanel = new JPanel();
 		selectionPanel.add(toolButtonPanel, BorderLayout.NORTH);
 		toolButtonPanel.setLayout(new WrapLayout(FlowLayout.CENTER, 5, 5));
-		
-		tglbtnPencil = new JToggleButton("");
-		tglbtnPencil.setIcon(new ImageIcon(EditorToolDialog.class.getResource("/edu/berea/walkerje/mswp/asset/pencil.png")));
-		tglbtnPencil.addActionListener(new ToolChangeListener(EToolType.PENCIL));
-		toolButtonPanel.add(tglbtnPencil);
-		
-		tglbtnEraser = new JToggleButton("");
-		tglbtnEraser.setIcon(new ImageIcon(EditorToolDialog.class.getResource("/edu/berea/walkerje/mswp/asset/eraser.png")));
-		tglbtnEraser.addActionListener(new ToolChangeListener(EToolType.ERASER));
-		toolButtonPanel.add(tglbtnEraser);
-		
-		tglbtnPaintBucket = new JToggleButton("");
-		tglbtnPaintBucket.setIcon(new ImageIcon(EditorToolDialog.class.getResource("/edu/berea/walkerje/mswp/asset/paintbucket.png")));
-		tglbtnPaintBucket.addActionListener(new ToolChangeListener(EToolType.FILL));
-		toolButtonPanel.add(tglbtnPaintBucket);
-		
-		tglbtnSelRectangle = new JToggleButton("");
-		tglbtnSelRectangle.setIcon(new ImageIcon(EditorToolDialog.class.getResource("/edu/berea/walkerje/mswp/asset/rectselect.png")));
-		tglbtnSelRectangle.addActionListener(new ToolChangeListener(EToolType.RECT_SELECT));
-		toolButtonPanel.add(tglbtnSelRectangle);
-		
-		tglbtnStamp = new JToggleButton("");
-		tglbtnStamp.setIcon(new ImageIcon(EditorToolDialog.class.getResource("/edu/berea/walkerje/mswp/asset/stamp.png")));
-		tglbtnStamp.addActionListener(new ToolChangeListener(EToolType.STAMP));
-		toolButtonPanel.add(tglbtnStamp);
-		
-		tglbtnEyeDropper = new JToggleButton("");
-		tglbtnEyeDropper.setIcon(new ImageIcon(EditorToolDialog.class.getResource("/edu/berea/walkerje/mswp/asset/dropper.png")));
-		tglbtnEyeDropper.addActionListener(new ToolChangeListener(EToolType.EYEDROP));
-		toolButtonPanel.add(tglbtnEyeDropper);
-		
-		tglbtnSprite = new JToggleButton("");
-		tglbtnSprite.setIcon(new ImageIcon(EditorToolDialog.class.getResource("/edu/berea/walkerje/mswp/asset/sprite.png")));
-		tglbtnSprite.addActionListener(new ToolChangeListener(EToolType.PUT_SPRITE));
-		toolButtonPanel.add(tglbtnSprite);
+
+		// In order to prevent fragile code from misordering tools, generate tools directly from enum
+		// TODO: Add proper handling for when a tool's image cannot be loaded
+		// it is currently not convinent to debug, as image names are stored in the enumeration.
+		toolButtons = new JToggleButton[EToolType.values().length];
+		int toolNum = 0;
+		for(EToolType type : EToolType.values()){
+			JToggleButton tglbtn = new JToggleButton("");
+			tglbtn.setIcon(new ImageIcon(EditorToolDialog.class.getResource(type.imagePath)));
+			tglbtn.addActionListener(new ToolChangeListener(type));
+			toolButtonPanel.add(tglbtn);
+			toolButtons[toolNum++] = tglbtn;
+		}
+		toolButtons[0].setSelected(true); // Autoselect first button
 		
 		layerComboBox = new JComboBox<String>();
 		layerComboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"Background", "Midground", "Foreground"}));
@@ -277,7 +249,7 @@ public class EditorToolDialog extends JDialog {
 		});
 		toolState.setSelectionSnapToTile(rdbtnSnapToTile.isSelected());
 		rectSelectToolPanel.add(rdbtnSnapToTile, "cell 0 0,alignx left");
-		
+
 		lblSelectionPosition = new JLabel("Selection Position: ");
 		rectSelectToolPanel.add(lblSelectionPosition, "cell 1 0,alignx right");
 		
@@ -373,11 +345,6 @@ public class EditorToolDialog extends JDialog {
 		
 		stampPreviewContentPanel = new JPanel();
 		stampPreviewScrollPanel.setViewportView(stampPreviewContentPanel);
-		
-		//Pencil, Eraser, fill, rect select, stamp, eyedrop, put_sprite
-		//It's important these are added in the order of the EToolType enumeration, otherwise things may break!
-		toolButtons = new JToggleButton[]{tglbtnPencil, tglbtnEraser, tglbtnPaintBucket, tglbtnSelRectangle, tglbtnStamp, tglbtnEyeDropper, tglbtnSprite};
-		tglbtnPencil.setSelected(true);//Select pencil by default.
 		
 		rebuildToolPanels();
 	}

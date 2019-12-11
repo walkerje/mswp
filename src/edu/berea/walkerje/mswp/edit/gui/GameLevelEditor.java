@@ -241,6 +241,7 @@ public class GameLevelEditor extends JPanel{
 		}else if(toolState.getTool() == EToolType.STAMP) {
 			if(toolState.getCurrentStamp() != null)
 				placeStampAt(tilePoint, toolState.getCurrentStamp());
+				editorPane.repaint();
 		}
 	}
 	

@@ -1,14 +1,15 @@
 package edu.berea.walkerje.mswp.edit.gui;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
+import javax.swing.event.MouseInputAdapter;
 import javax.swing.SwingUtilities;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -53,8 +54,45 @@ public class ProjectOutline extends JPanel {
 		splitPane.setLeftComponent(treePane);
 		
 		outlineTree = new JTree();
-		outlineTree.addTreeSelectionListener(e -> {
-			onOutlineSelection(e);
+		outlineTree.addMouseListener(new MouseInputAdapter(){
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				TreePath path = outlineTree.getPathForLocation(e.getX(), e.getY());
+				System.out.println(e.getClickCount());
+				if(path != null){
+				if(path.getPathCount() <= 2)
+					return;//Again, working on the assumption that we only select paths with a length > 2.
+				
+				EAssetType selectionType = (EAssetType)(((DefaultMutableTreeNode)path.getParentPath().getLastPathComponent()).getUserObject());
+				String selectionName = ((DefaultMutableTreeNode)(path.getLastPathComponent())).getUserObject().toString();
+
+				//What a ridiculous series of function calls to get what I originally put in the tree...
+				IAsset asset = workingProject.getAsset(selectionType, selectionName);
+				if(asset == null)
+					return;
+				
+				if(selectionPathStr == null ? false : selectionPathStr.equals(path.toString())){
+					if (e.getClickCount() == 2){
+						if (asset instanceof GameLevel){
+							editor.openLevelEditor((GameLevel)asset);
+						}
+					}
+					return;//Already showing the view for that specific asset! :(
+				}
+				
+				selectionPathStr = path.toString();
+				
+				if(asset instanceof Tilesheet) {
+					swapViewPane(new TilesheetAssetView((Tilesheet)asset));
+				}else if(asset instanceof Spritesheet) {
+					swapViewPane(new SpritesheetAssetView((Spritesheet)asset));
+				}else if(asset instanceof GameLevel) {
+					swapViewPane(new GameLevelAssetView(editor, (GameLevel)asset));
+				}else if(asset instanceof TileStamp) {
+					swapViewPane(new TileStampAssetView(editor, (TileStamp)asset));
+				}
+			}
+			}
 		});
 		outlineTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		outlineTree.setRootVisible(false);
@@ -110,39 +148,6 @@ public class ProjectOutline extends JPanel {
 		else selectionPathStr = null;//Previous selection just must not exist, then.
 	}
 
-	/**
-	 * Handle selection of an item in the outline.
-	 * Will try to maintain prior selection path.
-	 * @param e
-	 */
-	private void onOutlineSelection(TreeSelectionEvent e) {
-		if(e.getPath().getPathCount() <= 2)
-			return;//Again, working on the assumption that we only select paths with a length > 2.
-		
-		EAssetType selectionType = (EAssetType)(((DefaultMutableTreeNode)e.getPath().getParentPath().getLastPathComponent()).getUserObject());
-		String selectionName = ((DefaultMutableTreeNode)(e.getPath().getLastPathComponent())).getUserObject().toString();
-
-		//What a ridiculous series of function calls to get what I originally put in the tree...
-		IAsset asset = workingProject.getAsset(selectionType, selectionName);
-		if(asset == null)
-			return;
-		
-		if(selectionPathStr == null ? false : selectionPathStr.equals(e.getPath().toString()))
-			return;//Already showing the view for that specific asset! :(
-		
-		selectionPathStr = e.getPath().toString();
-		
-		if(asset instanceof Tilesheet) {
-			swapViewPane(new TilesheetAssetView((Tilesheet)asset));
-		}else if(asset instanceof Spritesheet) {
-			swapViewPane(new SpritesheetAssetView((Spritesheet)asset));
-		}else if(asset instanceof GameLevel) {
-			swapViewPane(new GameLevelAssetView(editor, (GameLevel)asset));
-		}else if(asset instanceof TileStamp) {
-			swapViewPane(new TileStampAssetView(editor, (TileStamp)asset));
-		}
-	}
-	
 	/**
 	 * Swaps the current visible asset view for the specified panel.
 	 * @param p
